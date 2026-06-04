@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student List - UiTM Attendance System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script>tailwind.config={theme:{extend:{fontFamily:{display:['Space Grotesk','sans-serif'],body:['DM Sans','sans-serif']}}}}</script>
+    <style>
+        :root{--bg:#0c0a0f;--bg-secondary:#13111a;--bg-card:#1a1723;--bg-hover:#231f30;--fg:#ece8f0;--fg-muted:#847a8e;--accent:#c2185b;--accent-hover:#e91a63;--accent-dim:rgba(194,24,91,0.12);--accent-glow:rgba(194,24,91,0.25);--uitm-maroon:#7a1b3e;--uitm-gold:#d4a843;--success:#34d399;--danger:#f87171;--warning:#fbbf24;--info:#818cf8;--border:#2a2535;}
+        *{box-sizing:border-box;margin:0;padding:0;}body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--fg);overflow-x:hidden;}
+        ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:var(--bg-secondary);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:var(--fg-muted);}
+        .bg-grid{background-image:radial-gradient(circle at 20% 50%,rgba(194,24,91,0.03) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(194,24,91,0.02) 0%,transparent 40%),linear-gradient(rgba(42,37,53,0.3) 1px,transparent 1px),linear-gradient(90deg,rgba(42,37,53,0.3) 1px,transparent 1px);background-size:100% 100%,100% 100%,60px 60px,60px 60px;}
+        .sidebar{background:var(--bg-secondary);border-right:1px solid var(--border);transition:width 0.3s ease,left 0.3s ease;}
+        .nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;border-radius:10px;cursor:pointer;transition:all 0.2s ease;color:var(--fg-muted);font-weight:500;position:relative;overflow:hidden;text-decoration:none;}
+        .nav-item::before{content:'';position:absolute;left:0;top:0;width:3px;height:100%;background:var(--accent);border-radius:0 3px 3px 0;transform:scaleY(0);transition:transform 0.2s ease;}
+        .nav-item:hover{background:var(--bg-hover);color:var(--fg);}.nav-item.active{background:var(--accent-dim);color:var(--accent);}.nav-item.active::before{transform:scaleY(1);}
+        .card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;transition:all 0.3s ease;}.card:hover{border-color:rgba(194,24,91,0.2);box-shadow:0 4px 24px rgba(0,0,0,0.3);}
+        .data-table{width:100%;border-collapse:separate;border-spacing:0;}.data-table thead th{padding:14px 16px;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--fg-muted);border-bottom:1px solid var(--border);background:var(--bg-secondary);position:sticky;top:0;z-index:5;}.data-table tbody tr{transition:background 0.15s ease;}.data-table tbody tr:hover{background:var(--bg-hover);}.data-table tbody td{padding:14px 16px;border-bottom:1px solid rgba(42,37,53,0.5);font-size:14px;}
+        .input-field{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--fg);font-size:14px;width:100%;transition:all 0.2s ease;outline:none;font-family:'DM Sans',sans-serif;}.input-field:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}.input-field::placeholder{color:var(--fg-muted);}
+        .btn-primary{background:var(--accent);color:white;font-weight:600;padding:12px 24px;border-radius:10px;border:none;cursor:pointer;font-size:14px;transition:all 0.2s ease;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:8px;}.btn-primary:hover{background:var(--accent-hover);transform:translateY(-1px);box-shadow:0 4px 20px var(--accent-glow);}.btn-primary:active{transform:translateY(0);}
+        .btn-secondary{background:var(--bg-hover);color:var(--fg);font-weight:500;padding:10px 20px;border-radius:10px;border:1px solid var(--border);cursor:pointer;font-size:14px;transition:all 0.2s ease;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:8px;}.btn-secondary:hover{background:var(--border);border-color:var(--fg-muted);}
+        .btn-danger{background:rgba(248,113,113,0.12);color:#f87171;font-weight:500;padding:8px 14px;border-radius:8px;border:1px solid rgba(248,113,113,0.2);cursor:pointer;font-size:13px;transition:all 0.2s ease;font-family:'DM Sans',sans-serif;}.btn-danger:hover{background:rgba(248,113,113,0.2);}
+        .avatar{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+        .uitm-crest{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--uitm-maroon));}
+        .admin-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(212,168,67,0.15);color:var(--uitm-gold);border:1px solid rgba(212,168,67,0.25);text-transform:uppercase;letter-spacing:0.05em;}
+        .pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--success);position:relative;}.pulse-dot::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--success);animation:pulse 2s ease-in-out infinite;}@keyframes pulse{0%,100%{opacity:0;transform:scale(0.8);}50%{opacity:0.5;transform:scale(1.2);}}
+        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s ease;}.modal-box{background:var(--bg-card);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:500px;width:90%;animation:modalIn 0.3s cubic-bezier(0.16,1,0.3,1);}@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}@keyframes modalIn{from{opacity:0;transform:scale(0.9) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+        .toast-container{position:fixed;top:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;}.toast{padding:14px 20px;border-radius:12px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;animation:toastIn 0.4s cubic-bezier(0.16,1,0.3,1);box-shadow:0 8px 32px rgba(0,0,0,0.3);min-width:280px;}.toast-success{background:#065f46;color:#6ee7b7;border:1px solid rgba(52,211,153,0.3);}.toast-error{background:#7f1d1d;color:#fca5a5;border:1px solid rgba(248,113,113,0.3);}.toast-info{background:#1e1e3f;color:#c4b5fd;border:1px solid rgba(129,140,248,0.3);}@keyframes toastIn{from{opacity:0;transform:translateX(40px) scale(0.95);}to{opacity:1;transform:translateX(0) scale(1);}}@keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateX(40px);}}
+        @media(max-width:768px){.sidebar{position:fixed;left:-260px;z-index:100;transition:left 0.3s ease;height:100vh;}.sidebar.open{left:0;}.mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:none;}.mobile-overlay.show{display:block;}}
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div><div id="modalContainer"></div>
+    <div class="min-h-screen flex">
+        <div class="mobile-overlay" id="mobileOverlay" onclick="closeSidebar()"></div>
+        <aside class="sidebar w-64 flex-shrink-0 flex flex-col h-screen sticky top-0" id="sidebar">
+            <div class="p-5 flex items-center gap-3"><div class="uitm-crest"><i class="fa-solid fa-building-columns text-white text-sm"></i></div><div><h2 class="font-display font-bold text-sm" style="color:var(--fg);">UiTM Attendance</h2><p class="text-xs" style="color:var(--fg-muted);">IMS566</p></div></div>
+            <nav class="flex-1 px-4 space-y-1">
+                <div class="text-xs font-semibold uppercase tracking-wider px-3 mb-3" style="color:var(--fg-muted);">Main Menu</div>
+                <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie w-5 text-center"></i><span>Dashboard</span></a>
+                <a href="attendance.html" class="nav-item"><i class="fa-solid fa-calendar-check w-5 text-center"></i><span>Attendance</span></a>
+                <a href="students.html" class="nav-item active"><i class="fa-solid fa-users w-5 text-center"></i><span>Student List</span></a>
+                <a href="announcements.html" class="nav-item"><i class="fa-solid fa-bullhorn w-5 text-center"></i><span>Announcements</span></a>
+                <div class="text-xs font-semibold uppercase tracking-wider px-3 mb-3 mt-6" style="color:var(--fg-muted);">System</div>
+                <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear w-5 text-center"></i><span>Preferences</span></a>
+            </nav>
+            <div class="p-4 m-4 rounded-xl" style="background:var(--accent-dim);border:1px solid rgba(194,24,91,0.15);"><p class="text-xs font-medium mb-1" style="color:var(--accent);">IMS566</p><p class="text-xs" style="color:var(--fg-muted);">Adv. Web Design Development &amp; Content Management</p></div>
+            <div class="p-4 border-t" style="border-color:var(--border);"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm" style="background:linear-gradient(135deg,var(--accent),var(--uitm-maroon));color:white;"><i class="fa-solid fa-user-shield text-xs"></i></div><div class="flex-1 min-w-0"><div class="flex items-center gap-2"><p class="text-sm font-medium truncate" style="color:var(--fg);" id="sidebarUser">Admin</p><span class="admin-badge" id="sidebarBadge">Admin</span></div><p class="text-xs truncate" style="color:var(--fg-muted);" id="sidebarEmail">admin@uitm.edu.my</p></div><button onclick="handleLogout()" style="color:var(--fg-muted);background:none;border:none;cursor:pointer;" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button></div></div>
+        </aside>
+        <main class="flex-1 min-h-screen bg-grid flex flex-col">
+            <header class="sticky top-0 z-50 flex items-center justify-between px-6 py-4" style="background:rgba(12,10,15,0.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);">
+                <div class="flex items-center gap-4"><button class="md:hidden" onclick="toggleSidebar()" style="background:none;border:none;color:var(--fg);cursor:pointer;font-size:20px;"><i class="fa-solid fa-bars"></i></button><div><h1 class="font-display text-lg font-bold">Student List</h1><p class="text-xs" style="color:var(--fg-muted);">Manage IMS566 enrolled students</p></div></div>
+                <div class="flex items-center gap-4"><div class="flex items-center gap-2"><div class="pulse-dot"></div><span class="text-xs font-medium hidden sm:inline" style="color:var(--success);">Online</span></div></div>
+            </header>
+            <div class="p-6 max-w-7xl mx-auto flex-1 w-full">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div class="flex items-center gap-3 flex-wrap"><div class="relative"><i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-sm" style="color:var(--fg-muted);"></i><input type="text" placeholder="Search by name or ID..." class="input-field" style="padding-left:36px;width:260px;" id="studentSearch" oninput="renderStudentList()"></div></div>
+                    <button class="btn-primary" onclick="openStudentModal()"><i class="fa-solid fa-plus"></i> Add Student</button>
+                </div>
+                <div class="card" style="padding:0;overflow:hidden;"><div style="max-height:600px;overflow-y:auto;"><table class="data-table"><thead><tr><th>Student</th><th>Student ID</th><th>Email</th><th>Attendance %</th><th>Actions</th></tr></thead><tbody id="studentTableBody"></tbody></table></div></div>
+            </div>
+            <footer style="background:var(--bg-secondary);border-top:1px solid var(--border);padding:24px 32px;margin-top:auto;"><div class="max-w-7xl mx-auto"><div class="pt-4" style="border-top:1px solid var(--border);"><p class="text-xs text-center" style="color:var(--fg-muted);">&copy; 2026 Universiti Teknologi MARA. All rights reserved. | IMS566 Faris Aiman INDIVIDUAL PROJECT</p></div></div></footer>
+        </main>
+    </div>
+    <script>
+    /**
+     * Predefined array of colors used to assign avatar background colors to students.
+     * Each student gets a color derived from their name hash.
+     */
+    var avatarColors=['#c2185b','#34d399','#f87171','#818cf8','#f472b6','#fb923c','#2dd4bf','#d4a843','#60a5fa','#a78bfa'];
+
+    /**
+     * Generates a consistent avatar color for a given name string.
+     * Uses a simple hash algorithm on the name characters, then maps
+     * the result to one of the colors in the avatarColors array.
+     * @param {string} n - The name string to hash for color selection.
+     * @returns {string} A hex color code from the avatarColors palette.
+     */
+    function getAvatarColor(n){var h=0;for(var i=0;i<n.length;i++){h=n.charCodeAt(i)+((h<<5)-h);}return avatarColors[Math.abs(h)%avatarColors.length];}
+
+    /**
+     * Extracts initials from a full name string for display in avatar components.
+     * If the name has 3 or more parts (e.g., "AHMAD FARHAN BIN ISMAIL"),
+     * it returns the first and last initials (e.g., "AI").
+     * Otherwise, it returns up to 2 initials from the beginning of each word.
+     * @param {string} n - The full name string.
+     * @returns {string} A 1-2 character uppercase string of initials.
+     */
+    function getInitials(n){var p=n.split(' ');if(p.length>=3)return(p[0][0]+p[p.length-1][0]).toUpperCase();return p.map(function(x){return x[0];}).join('').toUpperCase().slice(0,2);}
+
+    /**
+     * Converts an uppercase name string to title case format.
+     * Handles the special Malaysian name keywords "BIN" and "BINTI"
+     * by keeping them as "Bin" and "Binti" instead of "Bin" being treated
+     * as a regular word. All other words are capitalized on the first letter.
+     * @param {string} s - The uppercase name string (e.g., "AHMAD FARHAN BIN ISMAIL").
+     * @returns {string} The title-cased name (e.g., "Ahmad Farhan Bin Ismail").
+     */
+    function toTitleCase(s){var w=s.split(' '),r=[];for(var i=0;i<w.length;i++){if(w[i]==='BIN'||w[i]==='BINTI')r.push(w[i][0]+w[i].slice(1).toLowerCase());else r.push(w[i][0].toUpperCase()+w[i].slice(1).toLowerCase());}return r.join(' ');}
+
+    /**
+     * Displays a temporary toast notification in the top-right corner of the screen.
+     * The toast automatically fades out and removes itself after 3.5 seconds.
+     * @param {string} m - The message text to display in the toast.
+     * @param {string} [t='success'] - The type of toast: 'success', 'error', or 'info'.
+     *                                  This determines the color scheme and icon.
+     */
+    function showToast(m,t){t=t||'success';var c=document.getElementById('toastContainer'),el=document.createElement('div');var ic={success:'fa-check-circle',error:'fa-times-circle',info:'fa-info-circle'};el.className='toast toast-'+t;el.innerHTML='<i class="fa-solid '+ic[t]+'"></i><span>'+m+'</span>';c.appendChild(el);setTimeout(function(){el.style.animation='toastOut 0.3s ease forwards';setTimeout(function(){el.remove();},300);},3500);}
+
+    /**
+     * Toggles the mobile sidebar open/closed state.
+     * Also toggles the overlay backdrop that dims the main content
+     * when the sidebar is open on mobile devices.
+     */
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('mobileOverlay').classList.toggle('show');}
+
+    /**
+     * Closes the mobile sidebar by removing the 'open' class
+     * and hides the overlay backdrop by removing the 'show' class.
+     */
+    function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('mobileOverlay').classList.remove('show');}
+
+    /**
+     * Handles user logout by removing the authentication data
+     * from localStorage and redirecting to the login page (index.html).
+     */
+    function handleLogout(){localStorage.removeItem('atd_auth');window.location.href='index.html';}
+
+    /* Authentication check: redirect to login page if no auth data found,
+       otherwise populate the sidebar with the logged-in user's name, email, and role badge */
+    var auth=localStorage.getItem('atd_auth');if(!auth){window.location.href='index.html';}else{var a=JSON.parse(auth);document.getElementById('sidebarUser').textContent=a.name;document.getElementById('sidebarEmail').textContent=a.email;document.getElementById('sidebarBadge').textContent=a.role==='admin'?'Admin':'Student';}
+
+    /* Load students array and attendance records object from localStorage into memory */
+    var students=JSON.parse(localStorage.getItem('atd_students')||'[]');
+    var attendanceRecords=JSON.parse(localStorage.getItem('atd_records')||'{}');
+
+    /* Track the next available unique ID for adding new students */
+    var nextStudentId=parseInt(localStorage.getItem('atd_nextId')||'21');
+
+    /**
+     * Persists the current in-memory students array, attendance records object,
+     * and next student ID counter to localStorage so data is preserved across page reloads.
+     */
+    function saveData(){localStorage.setItem('atd_students',JSON.stringify(students));localStorage.setItem('atd_records',JSON.stringify(attendanceRecords));localStorage.setItem('atd_nextId',nextStudentId.toString());}
+
+    /**
+     * Calculates the attendance percentage for a specific student across all
+     * recorded dates. Counts both "present" and "late" statuses as attended.
+     * @param {number} sid - The unique ID of the student.
+     * @returns {number} The attendance percentage rounded to the nearest integer (0-100).
+     *                    Returns 0 if the student has no attendance records.
+     */
+    function getStudentAttendancePercentage(sid){var total=0,present=0,dates=Object.keys(attendanceRecords);for(var i=0;i<dates.length;i++){var rec=attendanceRecords[dates[i]][sid];if(rec){total++;if(rec==='present'||rec==='late')present++;}}if(total===0)return 0;return Math.round((present/total)*100);}
+
+    /* Check if a 'search' query parameter exists in the URL (e.g., from dashboard global search)
+       and pre-fill the student search input field with that value */
+    var urlParams=new URLSearchParams(window.location.search);
+    if(urlParams.get('search')){document.getElementById('studentSearch').value=urlParams.get('search');}
+
+    /**
+     * Renders the student list table based on the current search filter.
+     * Filters students by name, student ID, or email matching the search input.
+     * For each matching student, displays their avatar, name, phone, student ID,
+     * email, attendance percentage with a progress bar, and edit/delete action buttons.
+     * Shows a "No students found" message if no students match the filter.
+     */
+    function renderStudentList(){
+        var search=(document.getElementById('studentSearch').value||'').toLowerCase(),filtered=[];
+        for(var i=0;i<students.length;i++){var s=students[i];if(s.name.toLowerCase().indexOf(search)!==-1||s.studentId.indexOf(search)!==-1||s.email.toLowerCase().indexOf(search)!==-1)filtered.push(s);}
+        var tbody=document.getElementById('studentTableBody'),html='';
+        for(var i=0;i<filtered.length;i++){
+            var s=filtered[i],pct=getStudentAttendancePercentage(s.id),col=getAvatarColor(s.name),pc=pct>=75?'var(--success)':pct>=50?'var(--warning)':'var(--danger)';
+            html+='<tr><td><div class="flex items-center gap-3"><div class="avatar" style="background:'+col+'22;color:'+col+';">'+getInitials(s.name)+'</div><div><p class="font-medium text-sm">'+toTitleCase(s.name)+'</p><p class="text-xs" style="color:var(--fg-muted);">'+(s.phone||'N/A')+'</p></div></div></td><td><span class="text-sm font-mono font-semibold" style="color:var(--accent);">'+s.studentId+'</span></td><td><span class="text-sm" style="color:var(--fg-muted);">'+s.email+'</span></td><td><div class="flex items-center gap-2"><div class="w-16 h-2 rounded-full" style="background:var(--bg);"><div class="h-full rounded-full" style="width:'+pct+'%;background:'+pc+';"></div></div><span class="text-sm font-semibold" style="color:'+pc+';">'+pct+'%</span></div></td><td><div class="flex gap-2"><button class="btn-secondary" style="padding:6px 10px;font-size:12px;" onclick="openStudentModal('+s.id+')"><i class="fa-solid fa-pen-to-square"></i></button><button class="btn-danger" style="padding:6px 10px;font-size:12px;" onclick="deleteStudent('+s.id+')"><i class="fa-solid fa-trash"></i></button></div></td></tr>';
+        }
+        tbody.innerHTML=html||'<tr><td colspan="5" class="text-center py-8" style="color:var(--fg-muted);">No students found</td></tr>';
+    }
+
+    /**
+     * Opens a modal dialog for adding a new student or editing an existing one.
+     * If a student ID (sid) is provided, the modal is pre-filled with that
+     * student's current data for editing. Otherwise, the modal fields are empty
+     * for adding a new student. The modal includes fields for name, student ID,
+     * course (fixed as IMS566), email, and phone number.
+     * @param {number} [sid] - The student ID to edit. If null/undefined, opens in "add" mode.
+     */
+    function openStudentModal(sid){
+        var isEdit=(sid!==null&&sid!==undefined),student=null;
+        if(isEdit){for(var i=0;i<students.length;i++){if(students[i].id===sid){student=students[i];break;}}}
+        var modal=document.createElement('div');modal.className='modal-overlay';modal.id='studentModal';
+        modal.innerHTML='<div class="modal-box"><div class="flex items-center justify-between mb-6"><h3 class="font-display text-lg font-bold">'+(isEdit?'Edit Student':'Add New Student')+'</h3><button onclick="closeStudentModal()" style="background:none;border:none;color:var(--fg-muted);cursor:pointer;font-size:18px;"><i class="fa-solid fa-xmark"></i></button></div><div class="space-y-4"><div><label class="block text-sm font-medium mb-1" style="color:var(--fg-muted);">Full Name <span style="color:var(--danger);">*</span></label><input type="text" id="modalName" class="input-field" placeholder="e.g. AHMAD FARHAN BIN ISMAIL" value="'+(isEdit?student.name:'')+'" oninput="this.value=this.value.toUpperCase()"></div><div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-medium mb-1" style="color:var(--fg-muted);">Student ID <span style="color:var(--danger);">*</span></label><input type="text" id="modalStudentId" class="input-field" placeholder="2025XXXXXX" maxlength="10" value="'+(isEdit?student.studentId:'')+'" oninput="this.value=this.value.replace(/[^0-9]/g,\'\')"></div><div><label class="block text-sm font-medium mb-1" style="color:var(--fg-muted);">Course</label><div class="input-field flex items-center gap-2" style="cursor:default;background:var(--bg-hover);"><i class="fa-solid fa-code text-xs" style="color:var(--accent);"></i><span class="text-sm font-semibold" style="color:var(--accent);">IMS566</span></div></div></div><div><label class="block text-sm font-medium mb-1" style="color:var(--fg-muted);">Email <span style="color:var(--danger);">*</span></label><input type="email" id="modalEmail" class="input-field" placeholder="student@uitm.edu.my" value="'+(isEdit?student.email:'')+'"></div><div><label class="block text-sm font-medium mb-1" style="color:var(--fg-muted);">Phone</label><input type="tel" id="modalPhone" class="input-field" placeholder="01XXXXXXXX" value="'+(isEdit?(student.phone||''):'')+'" oninput="this.value=this.value.replace(/[^0-9]/g,\'\')" maxlength="11"></div><div class="flex gap-3 pt-2"><button class="btn-primary flex-1 justify-center" onclick="saveStudent('+(isEdit?sid:'null')+')"><i class="fa-solid fa-check"></i> '+(isEdit?'Update':'Add Student')+'</button><button class="btn-secondary" onclick="closeStudentModal()">Cancel</button></div></div></div>';
+        document.getElementById('modalContainer').appendChild(modal);setTimeout(function(){document.getElementById('modalName').focus();},100);
+    }
+
+    /**
+     * Closes and removes the student add/edit modal from the DOM.
+     * Safely checks if the modal element exists before attempting removal.
+     */
+    function closeStudentModal(){var m=document.getElementById('studentModal');if(m)m.remove();}
+
+    /**
+     * Saves a student record — either adding a new student or updating an existing one.
+     * Validates that name is not empty, student ID matches the format 2025 + 6 digits,
+     * email is provided, and the student ID is not a duplicate of another student.
+     * On successful save, persists data to localStorage, closes the modal, and refreshes the table.
+     * @param {number} [sid] - The student ID to update. If null, creates a new student.
+     */
+    function saveStudent(sid){
+        var name=document.getElementById('modalName').value.trim().toUpperCase(),sidVal=document.getElementById('modalStudentId').value.trim(),email=document.getElementById('modalEmail').value.trim(),phone=document.getElementById('modalPhone').value.trim();
+        if(!name){showToast('Please enter student name','error');return;}if(!/^2025\d{6}$/.test(sidVal)){showToast('Student ID must start with 2025 and be 10 digits','error');return;}if(!email){showToast('Please enter email','error');return;}
+        var dup=false;for(var i=0;i<students.length;i++){if(students[i].studentId===sidVal&&students[i].id!==sid){dup=true;break;}}if(dup){showToast('Student ID already exists','error');return;}
+        if(sid){for(var i=0;i<students.length;i++){if(students[i].id===sid){students[i].name=name;students[i].studentId=sidVal;students[i].email=email;students[i].phone=phone;break;}}showToast('Student updated successfully','success');}
+        else{students.push({id:nextStudentId++,name:name,studentId:sidVal,class:'IMS566',email:email,phone:phone});showToast('Student added successfully','success');}
+        saveData();closeStudentModal();renderStudentList();
+    }
+
+    /**
+     * Opens a confirmation modal dialog before deleting a student.
+     * Displays a warning icon, the student's name, and Cancel/Delete buttons.
+     * If the student ID is not found in the array, the function exits early.
+     * @param {number} sId - The unique ID of the student to be deleted.
+     */
+    function deleteStudent(sId){
+        var student=null;for(var i=0;i<students.length;i++){if(students[i].id===sId){student=students[i];break;}}if(!student)return;
+        var modal=document.createElement('div');modal.className='modal-overlay';modal.id='deleteModal';
+        modal.innerHTML='<div class="modal-box" style="max-width:400px;text-align:center;"><div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style="background:rgba(248,113,113,0.12);"><i class="fa-solid fa-triangle-exclamation text-xl" style="color:var(--danger);"></i></div><h3 class="font-display text-lg font-bold mb-2">Delete Student</h3><p class="text-sm mb-6" style="color:var(--fg-muted);">Are you sure you want to remove <strong style="color:var(--fg);">'+toTitleCase(student.name)+'</strong>?</p><div class="flex gap-3"><button class="btn-secondary flex-1 justify-center" onclick="closeDeleteModal()">Cancel</button><button class="btn-primary flex-1 justify-center" style="background:var(--danger);" onclick="confirmDelete('+sId+')"><i class="fa-solid fa-trash"></i> Delete</button></div></div>';
+        document.getElementById('modalContainer').appendChild(modal);
+    }
+
+    /**
+     * Closes and removes the delete confirmation modal from the DOM.
+     * Safely checks if the modal element exists before attempting removal.
+     */
+    function closeDeleteModal(){var m=document.getElementById('deleteModal');if(m)m.remove();}
+
+    /**
+     * Confirms and executes the deletion of a student record.
+     * Removes the student from the students array, deletes all of their
+     * attendance records from every date in attendanceRecords, persists
+     * the updated data to localStorage, closes the delete modal, refreshes
+     * the student table, and shows a success toast notification.
+     * @param {number} sId - The unique ID of the student to delete.
+     */
+    function confirmDelete(sId){
+        var ns=[];for(var i=0;i<students.length;i++){if(students[i].id!==sId)ns.push(students[i]);}students=ns;
+        var dk=Object.keys(attendanceRecords);for(var i=0;i<dk.length;i++){delete attendanceRecords[dk[i]][sId];}
+        saveData();closeDeleteModal();renderStudentList();showToast('Student removed successfully','success');
+    }
+
+    /* Global keyboard listener: closes any open modal (student or delete)
+       when the Escape key is pressed, providing a quick way to dismiss dialogs */
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeStudentModal();closeDeleteModal();}});
+
+    /* Initial render of the student list table when the page loads */
+    renderStudentList();
+    </script>
+</body>
+</html>

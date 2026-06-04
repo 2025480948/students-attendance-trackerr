@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="UiTM Student Attendance Management System for IMS566">
+    <meta name="keywords" content="UiTM, attendance, IMS566, student portal, Faris Aiman">
+    <meta name="author" content="Faris Aiman">
+    <title>UiTM Student Attendance System - IMS566</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { display: ['Space Grotesk', 'sans-serif'], body: ['DM Sans', 'sans-serif'] } } } }
+    </script>
+    <style>
+        :root { --bg:#0c0a0f; --bg-secondary:#13111a; --bg-card:#1a1723; --bg-hover:#231f30; --fg:#ece8f0; --fg-muted:#847a8e; --accent:#c2185b; --accent-hover:#e91a63; --accent-dim:rgba(194,24,91,0.12); --accent-glow:rgba(194,24,91,0.25); --uitm-maroon:#7a1b3e; --uitm-gold:#d4a843; --success:#34d399; --danger:#f87171; --warning:#fbbf24; --info:#818cf8; --border:#2a2535; }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--fg); overflow-x:hidden; }
+        ::-webkit-scrollbar { width:6px; } ::-webkit-scrollbar-track { background:var(--bg-secondary); } ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; } ::-webkit-scrollbar-thumb:hover { background:var(--fg-muted); }
+        .auth-bg { background: radial-gradient(ellipse at 20% 30%,rgba(194,24,91,0.1) 0%,transparent 60%), radial-gradient(ellipse at 80% 70%,rgba(122,27,62,0.08) 0%,transparent 50%), radial-gradient(ellipse at 50% 50%,rgba(212,168,67,0.03) 0%,transparent 60%), var(--bg); }
+        .orb { position:absolute; border-radius:50%; filter:blur(90px); animation:orbFloat 10s ease-in-out infinite; pointer-events:none; }
+        .orb-1 { width:350px; height:350px; background:rgba(194,24,91,0.08); top:5%; left:5%; }
+        .orb-2 { width:250px; height:250px; background:rgba(122,27,62,0.06); bottom:15%; right:10%; animation-delay:-4s; }
+        .orb-3 { width:200px; height:200px; background:rgba(212,168,67,0.05); top:50%; left:60%; animation-delay:-7s; }
+        @keyframes orbFloat { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(25px,-20px) scale(1.05);} 66%{transform:translate(-15px,18px) scale(0.95);} }
+        .card { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:24px; transition:all 0.3s ease; }
+        .card:hover { border-color:rgba(194,24,91,0.2); box-shadow:0 4px 24px rgba(0,0,0,0.3); }
+        .input-field { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:12px 16px; color:var(--fg); font-size:14px; width:100%; transition:all 0.2s ease; outline:none; font-family:'DM Sans',sans-serif; }
+        .input-field:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
+        .input-field::placeholder { color:var(--fg-muted); }
+        .input-field.error { border-color:var(--danger); box-shadow:0 0 0 3px rgba(248,113,113,0.12); }
+        .field-error { font-size:12px; color:var(--danger); margin-top:4px; display:none; }
+        .field-error.show { display:block; }
+        .btn-primary { background:var(--accent); color:white; font-weight:600; padding:12px 24px; border-radius:10px; border:none; cursor:pointer; font-size:14px; transition:all 0.2s ease; font-family:'DM Sans',sans-serif; display:inline-flex; align-items:center; gap:8px; }
+        .btn-primary:hover { background:var(--accent-hover); transform:translateY(-1px); box-shadow:0 4px 20px var(--accent-glow); }
+        .btn-primary:active { transform:translateY(0); }
+        .btn-secondary { background:var(--bg-hover); color:var(--fg); font-weight:500; padding:10px 20px; border-radius:10px; border:1px solid var(--border); cursor:pointer; font-size:14px; transition:all 0.2s ease; font-family:'DM Sans',sans-serif; display:inline-flex; align-items:center; gap:8px; }
+        .btn-secondary:hover { background:var(--border); border-color:var(--fg-muted); }
+        .custom-check { appearance:none; width:18px; height:18px; border:2px solid var(--border); border-radius:5px; cursor:pointer; transition:all 0.15s ease; position:relative; }
+        .custom-check:checked { background:var(--accent); border-color:var(--accent); }
+        .custom-check:checked::after { content:'\2713'; position:absolute; top:-1px; left:2px; font-size:12px; color:white; font-weight:700; }
+        .uitm-shield { width:56px; height:56px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--accent),var(--uitm-maroon)); box-shadow:0 4px 20px var(--accent-glow); position:relative; }
+        .uitm-shield::after { content:''; position:absolute; inset:-2px; border-radius:16px; background:linear-gradient(135deg,var(--accent),var(--uitm-gold)); z-index:-1; opacity:0.3; }
+        .auth-page { display:none; } .auth-page.active { display:flex; }
+        .strength-bar { height:4px; border-radius:2px; background:var(--border); overflow:hidden; margin-top:6px; }
+        .strength-fill { height:100%; border-radius:2px; transition:width 0.3s ease,background 0.3s ease; width:0%; }
+        .step-dot { width:10px; height:10px; border-radius:50%; background:var(--border); transition:all 0.3s ease; }
+        .step-dot.active { background:var(--accent); box-shadow:0 0 8px var(--accent-glow); }
+        .step-dot.done { background:var(--success); }
+        .avatar { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; }
+        .toast-container { position:fixed; top:24px; right:24px; z-index:9999; display:flex; flex-direction:column; gap:10px; }
+        .toast { padding:14px 20px; border-radius:12px; font-size:14px; font-weight:500; display:flex; align-items:center; gap:10px; animation:toastIn 0.4s cubic-bezier(0.16,1,0.3,1); box-shadow:0 8px 32px rgba(0,0,0,0.3); min-width:280px; }
+        .toast-success { background:#065f46; color:#6ee7b7; border:1px solid rgba(52,211,153,0.3); }
+        .toast-error { background:#7f1d1d; color:#fca5a5; border:1px solid rgba(248,113,113,0.3); }
+        .toast-info { background:#1e1e3f; color:#c4b5fd; border:1px solid rgba(129,140,248,0.3); }
+        @keyframes toastIn { from{opacity:0;transform:translateX(40px) scale(0.95);} to{opacity:1;transform:translateX(0) scale(1);} }
+        @keyframes toastOut { from{opacity:1;} to{opacity:0;transform:translateX(40px);} }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+    <div id="authContainer">
+        <!-- Login Page -->
+        <div id="loginPage" class="auth-page active auth-bg min-h-screen items-center justify-center relative overflow-hidden">
+            <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+            <div class="relative z-10 w-full max-w-md px-6">
+                <div class="text-center mb-8">
+                    <div class="uitm-shield mx-auto mb-5"><i class="fa-solid fa-building-columns text-2xl text-white"></i></div>
+                    <h1 class="font-display text-2xl font-bold mb-1">Universiti Teknologi MARA</h1>
+                    <p class="text-sm" style="color:var(--fg-muted);">Student Attendance Management System</p>
+                    <div class="flex items-center justify-center gap-2 mt-3 flex-wrap">
+                        <span class="text-xs font-semibold px-3 py-1 rounded-full" style="background:var(--accent-dim);color:var(--accent);">IMS566</span>
+                        <span class="text-xs font-semibold px-3 py-1 rounded-full" style="background:rgba(212,168,67,0.12);color:var(--uitm-gold);">Semester 4 2026</span>
+                    </div>
+                    <p class="text-xs mt-2" style="color:var(--fg-muted);">Advanced Web Design Development &amp; Content Management</p>
+                </div>
+                <div class="card" style="padding:32px;">
+                    <h2 class="font-display text-xl font-semibold mb-6">Sign In</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2" style="color:var(--fg-muted);">Username</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-user-shield absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:var(--fg-muted);"></i>
+                                <input type="text" id="loginUser" class="input-field" style="padding-left:40px;" placeholder="Username">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2" style="color:var(--fg-muted);">Password</label>
+                            <div class="relative">
+                                <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:var(--fg-muted);"></i>
+                                <input type="password" id="loginPass" class="input-field" style="padding-left:40px;" placeholder="Password">
+                                <button onclick="togglePass('loginPass','loginEye')" class="absolute right-4 top-1/2 -translate-y-1/2" style="color:var(--fg-muted);background:none;border:none;cursor:pointer;"><i class="fa-solid fa-eye" id="loginEye"></i></button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center gap-2 cursor-pointer text-sm" style="color:var(--fg-muted);"><input type="checkbox" class="custom-check"> Remember me</label>
+                            <a href="#" class="text-sm font-medium" style="color:var(--accent);" onclick="event.preventDefault();showToast('Please contact IT admin at admin@uitm.edu.my','info')">Forgot password?</a>
+                        </div>
+                        <button onclick="handleLogin()" class="btn-primary w-full justify-center text-base" style="padding:14px;"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+                    </div>
+                    <div class="relative my-6"><div class="absolute inset-0 flex items-center"><div class="w-full" style="border-top:1px solid var(--border);"></div></div><div class="relative flex justify-center"><span class="px-3 text-xs" style="background:var(--bg-card);color:var(--fg-muted);">or</span></div></div>
+                    <p class="text-center text-sm" style="color:var(--fg-muted);">New student? <a href="#" class="font-semibold" style="color:var(--accent);" onclick="event.preventDefault();switchAuth('signup')">Register Account</a></p>
+                </div>
+                <p class="text-center text-xs mt-6" style="color:var(--fg-muted);">Admin credentials: <strong style="color:var(--fg);">admin</strong> / <strong style="color:var(--fg);">admin123</strong></p>
+            </div>
+        </div>
+        <!-- Signup Page -->
+        <div id="signupPage" class="auth-page auth-bg min-h-screen items-center justify-center relative overflow-hidden">
+            <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+            <div class="relative z-10 w-full max-w-md px-6">
+                <div class="text-center mb-6">
+                    <div class="uitm-shield mx-auto mb-4"><i class="fa-solid fa-building-columns text-2xl text-white"></i></div>
+                    <h1 class="font-display text-2xl font-bold mb-1">Student Registration</h1>
+                    <p class="text-sm" style="color:var(--fg-muted);">Register for IMS566 attendance system</p>
+                </div>
+                <div class="flex items-center justify-center gap-3 mb-6">
+                    <div class="step-dot active" id="step1Dot"></div><div class="w-8 h-px" style="background:var(--border);"></div>
+                    <div class="step-dot" id="step2Dot"></div><div class="w-8 h-px" style="background:var(--border);"></div>
+                    <div class="step-dot" id="step3Dot"></div>
+                </div>
+                <div class="card" style="padding:28px;">
+                    <div id="signupStep1" class="signup-step">
+                        <h3 class="font-display font-semibold mb-1">Student Information</h3>
+                        <p class="text-xs mb-5" style="color:var(--fg-muted);">Enter your UiTM student details</p>
+                        <div class="space-y-4">
+                            <div><label class="block text-sm font-medium mb-1" style="color:var(--fg-muted);">Full Name <span style="color:var(--danger);">*</span></label><div class="relative"><i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:var(--fg-muted);"></i><input type="text" id="signupName" class="input-field" style="padding-left:40px;" placeholder="e.g. AHMAD FARHAN BIN ISMAIL" oninput="this.value=this.value.toUpperCase()"></div><p class="field-error" id="nameError">Please enter your full name</p></div>
+                            <div><label class="block text-sm font-medium mb-1" style="color:var(--fg-muted);">Student ID <span style="color:var(--danger);">*</span></label><div class="relative"><i class="fa-solid fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:var(--fg-muted);"></i><input type="text" id="signupId" class="input-field" style="padding-left:40px;" placeholder="2025XXXXXX" maxlength="10" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div><p class="field-error" id="idError">Student ID must start with 2025 and be 10 digits</p><p class="text-xs mt-1" style="color:var(--fg-muted);">Format: 2025 + 6 digits</p></div>
+                            <div><label class="block text-sm font-medium mb-1" style="color:var(--fg-muted);">Course</label><div class="input-field flex items-center gap-2" style="cursor:default;"><i class="fa-solid fa-code text-sm" style="color:var(--accent);"></i><span class="font-semibold text-sm" style="color:var(--accent);">IMS566</span><span class="text-xs" style="color:var(--fg-muted);">- Adv. Web Design &amp; CMS</span></div></div>
+                            <button onclick="goToSignupStep(2)" class="btn-primary w-full justify-center" style="padding:14px;margin-top:8px;">Continue <i class="fa-solid fa-arrow-right"></i></button>
+                        </div>
+                    </div>
+                    <div id="signupStep2" class="signup-step" style="display:none;">
+                        <h3 class="font-display font-semibold mb-1">Account Setup</h3>
+                        <p class="text-xs mb-5" style="color:var(--fg-muted);">Set up your contact and password</p>
+                        <div class="space-y-4">
+                            <div><label class="block text-sm font-medium mb-1" style="color:var(--fg-muted);">UiTM Email <span style="color:var(--danger);">*</span></label><div class="relative"><i class="fa-solid fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:var(--fg-muted);"></i><input type="email" id="signupEmail" class="input-field" style="padding-left:40px;" placeholder="student@uitm.edu.my"></div><p class="field-error" id="emailError">Please enter a valid email address</p></div>
+                            <div><label class="block text-sm font-medium mb-1" style="color:var(--fg-muted);">Phone Number</label><div class="relative"><i class="fa-solid fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:var(--fg-muted);"></i><input type="tel" id="signupPhone" class="input-field" style="padding-left:40px;" placeholder="01XXXXXXXX" maxlength="11" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div></div>
+                            <div><label class="block text-sm font-medium mb-1" style="color:var(--fg-muted);">Password <span style="color:var(--danger);">*</span></label><div class="relative"><i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:var(--fg-muted);"></i><input type="password" id="signupPass" class="input-field" style="padding-left:40px;padding-right:40px;" placeholder="Create a password" oninput="updatePasswordStrength(this.value)"><button onclick="togglePass('signupPass','signupEye')" class="absolute right-4 top-1/2 -translate-y-1/2" style="color:var(--fg-muted);background:none;border:none;cursor:pointer;"><i class="fa-solid fa-eye" id="signupEye"></i></button></div><div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div><p class="text-xs mt-1" style="color:var(--fg-muted);" id="strengthText">Minimum 6 characters</p><p class="field-error" id="passError">Password must be at least 6 characters</p></div>
+                            <div><label class="block text-sm font-medium mb-1" style="color:var(--fg-muted);">Confirm Password <span style="color:var(--danger);">*</span></label><div class="relative"><i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-sm" style="color:var(--fg-muted);"></i><input type="password" id="signupConfirm" class="input-field" style="padding-left:40px;" placeholder="Re-enter password"></div><p class="field-error" id="confirmError">Passwords do not match</p></div>
+                            <div class="flex gap-3" style="margin-top:8px;"><button onclick="goToSignupStep(1)" class="btn-secondary flex-1 justify-center"><i class="fa-solid fa-arrow-left"></i> Back</button><button onclick="goToSignupStep(3)" class="btn-primary flex-1 justify-center">Continue <i class="fa-solid fa-arrow-right"></i></button></div>
+                        </div>
+                    </div>
+                    <div id="signupStep3" class="signup-step" style="display:none;">
+                        <h3 class="font-display font-semibold mb-1">Review &amp; Confirm</h3>
+                        <p class="text-xs mb-5" style="color:var(--fg-muted);">Verify your registration details</p>
+                        <div class="space-y-3 mb-5" id="reviewDetails"></div>
+                        <label class="flex items-start gap-2 cursor-pointer mb-5" style="color:var(--fg-muted);"><input type="checkbox" class="custom-check mt-0.5" id="agreeTerms"><span class="text-xs">I confirm that the information provided is accurate and I agree to the terms and conditions.</span></label>
+                        <p class="field-error" id="termsError">You must agree to the terms</p>
+                        <div class="flex gap-3"><button onclick="goToSignupStep(2)" class="btn-secondary flex-1 justify-center"><i class="fa-solid fa-arrow-left"></i> Back</button><button onclick="handleSignup()" class="btn-primary flex-1 justify-center"><i class="fa-solid fa-user-plus"></i> Register</button></div>
+                    </div>
+                    <div class="relative my-5"><div class="absolute inset-0 flex items-center"><div class="w-full" style="border-top:1px solid var(--border);"></div></div><div class="relative flex justify-center"><span class="px-3 text-xs" style="background:var(--bg-card);color:var(--fg-muted);">or</span></div></div>
+                    <p class="text-center text-sm" style="color:var(--fg-muted);">Already have an account? <a href="#" class="font-semibold" style="color:var(--accent);" onclick="event.preventDefault();switchAuth('login')">Sign In</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    /* Color palette used for generating avatar background colors */
+    var avatarColors=['#c2185b','#34d399','#f87171','#818cf8','#f472b6','#fb923c','#2dd4bf','#d4a843','#60a5fa','#a78bfa'];
+
+    /**
+     * Generates a consistent avatar color based on a name string.
+     * Uses a simple hash function to map the name to one of the predefined colors.
+     * @param {string} n - The name string used to derive the color.
+     * @returns {string} A hex color code from the avatarColors array.
+     */
+    function getAvatarColor(n){var h=0;for(var i=0;i<n.length;i++){h=n.charCodeAt(i)+((h<<5)-h);}return avatarColors[Math.abs(h)%avatarColors.length];}
+
+    /**
+     * Extracts initials from a full name for use in avatar displays.
+     * If the name has 3 or more parts (e.g., "AHMAD FARHAN BIN ISMAIL"),
+     * returns the first and last initials (e.g., "AI").
+     * Otherwise, returns up to 2 initials from the first parts.
+     * @param {string} n - The full name string.
+     * @returns {string} A 1-2 character string of uppercase initials.
+     */
+    function getInitials(n){var p=n.split(' ');if(p.length>=3)return(p[0][0]+p[p.length-1][0]).toUpperCase();return p.map(function(x){return x[0];}).join('').toUpperCase().slice(0,2);}
+
+    /**
+     * Converts an uppercase name string to title case, preserving
+     * the special keywords "BIN" and "BINTI" with only the first letter capitalized.
+     * @param {string} s - The uppercase name string (e.g., "AHMAD FARHAN BIN ISMAIL").
+     * @returns {string} The title-cased name string (e.g., "Ahmad Farhan Bin Ismail").
+     */
+    function toTitleCase(s){var w=s.split(' '),r=[];for(var i=0;i<w.length;i++){if(w[i]==='BIN'||w[i]==='BINTI')r.push(w[i][0]+w[i].slice(1).toLowerCase());else r.push(w[i][0].toUpperCase()+w[i].slice(1).toLowerCase());}return r.join(' ');}
+
+    /* Default list of 20 pre-loaded students for the IMS566 course */
+    var defaultStudents=[
+        {id:1,name:'AHMAD FARHAN BIN ISMAIL',studentId:'2025812345',class:'IMS566',email:'farhan@uitm.edu.my',phone:'0123456789'},
+        {id:2,name:'SITI NUR AISHAH BINTI ABDUL RAHMAN',studentId:'2025812346',class:'IMS566',email:'aishah@uitm.edu.my',phone:'0123456790'},
+        {id:3,name:'MUHAMMAD HAZIM BIN ZULKIFLI',studentId:'2025812347',class:'IMS566',email:'hazim@uitm.edu.my',phone:'0123456791'},
+        {id:4,name:'NURUL IZZAH BINTI MOHD NOOR',studentId:'2025812348',class:'IMS566',email:'izzah@uitm.edu.my',phone:'0123456792'},
+        {id:5,name:'AMIR DANIAL BIN HAFIZ',studentId:'2025812349',class:'IMS566',email:'danial@uitm.edu.my',phone:'0123456793'},
+        {id:6,name:'PUTRI SAFIYA BINTI ABDULLAH',studentId:'2025812350',class:'IMS566',email:'safiya@uitm.edu.my',phone:'0123456794'},
+        {id:7,name:'MUHAMMAD AKMAL BIN ROSLAN',studentId:'2025812351',class:'IMS566',email:'akmal@uitm.edu.my',phone:'0123456795'},
+        {id:8,name:'FATIN NADHIRAH BINTI YUSOF',studentId:'2025812352',class:'IMS566',email:'nadhirah@uitm.edu.my',phone:'0123456796'},
+        {id:9,name:'IQBAL HAZIQ BIN SHAHRUL',studentId:'2025812353',class:'IMS566',email:'haziq@uitm.edu.my',phone:'0123456797'},
+        {id:10,name:'NUR AMIRA BINTI HASHIM',studentId:'2025812354',class:'IMS566',email:'amira@uitm.edu.my',phone:'0123456798'},
+        {id:11,name:'DANISH IRFAN BIN AZMI',studentId:'2025812355',class:'IMS566',email:'irfan@uitm.edu.my',phone:'0123456799'},
+        {id:12,name:'AINUL MARDHIAH BINTI KAMARUDDIN',studentId:'2025812356',class:'IMS566',email:'mardhiah@uitm.edu.my',phone:'0123456800'},
+        {id:13,name:'HAFIZ AZLAN BIN MOHD SALLEH',studentId:'2025812357',class:'IMS566',email:'azlan@uitm.edu.my',phone:'0123456801'},
+        {id:14,name:'SITI KHADIJAH BINTI OTHMAN',studentId:'2025812358',class:'IMS566',email:'khadijah@uitm.edu.my',phone:'0123456802'},
+        {id:15,name:'RAYYAN ARIFF BIN ABDUL MALIK',studentId:'2025812359',class:'IMS566',email:'rayyan@uitm.edu.my',phone:'0123456803'},
+        {id:16,name:'NABIHAH BINTI CHE YUSOFF',studentId:'2025812360',class:'IMS566',email:'nabihah@uitm.edu.my',phone:'0123456804'},
+        {id:17,name:'ZAID BIN ISKANDAR',studentId:'2025812361',class:'IMS566',email:'zaid@uitm.edu.my',phone:'0123456805'},
+        {id:18,name:'HUSNA BINTI MOHD FAUZI',studentId:'2025812362',class:'IMS566',email:'husna@uitm.edu.my',phone:'0123456806'},
+        {id:19,name:'LUQMAN HAKIM BIN RAMLI',studentId:'2025812363',class:'IMS566',email:'luqman@uitm.edu.my',phone:'0123456807'},
+        {id:20,name:'ZAHRAH BINTI AHMAD TARMIZI',studentId:'2025812364',class:'IMS566',email:'zahrah@uitm.edu.my',phone:'0123456808'}
+    ];
+
+    /**
+     * Initializes the localStorage data store with default students,
+     * randomly generated attendance records for the last 30 weekdays,
+     * an empty registered users list, and the admin account.
+     * Only runs once — skips if 'atd_initialized' flag already exists in localStorage.
+     */
+    function initDataStore(){
+        if(!localStorage.getItem('atd_initialized')){
+            var students=defaultStudents.slice();
+            var records={};
+            var today=new Date();
+            var statuses=['present','present','present','present','present','absent','late'];
+            for(var d=30;d>=0;d--){
+                var date=new Date(today);date.setDate(date.getDate()-d);
+                if(date.getDay()===0||date.getDay()===6)continue;
+                var key=date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
+                records[key]={};
+                for(var i=0;i<students.length;i++){records[key][students[i].id]=statuses[Math.floor(Math.random()*statuses.length)];}
+            }
+            localStorage.setItem('atd_students',JSON.stringify(students));
+            localStorage.setItem('atd_records',JSON.stringify(records));
+            localStorage.setItem('atd_registered',JSON.stringify([]));
+            localStorage.setItem('atd_nextId','21');
+            localStorage.setItem('atd_admin',JSON.stringify({username:'admin',password:'admin123',email:'admin@uitm.edu.my',name:'System Administrator'}));
+            localStorage.setItem('atd_initialized','true');
+        }
+    }
+
+    /**
+     * Displays a temporary toast notification in the top-right corner.
+     * Automatically removes itself after 3.5 seconds with a fade-out animation.
+     * @param {string} m - The message text to display in the toast.
+     * @param {string} [t='success'] - The toast type: 'success', 'error', or 'info'.
+     */
+    function showToast(m,t){t=t||'success';var c=document.getElementById('toastContainer'),el=document.createElement('div');var ic={success:'fa-check-circle',error:'fa-times-circle',info:'fa-info-circle'};el.className='toast toast-'+t;el.innerHTML='<i class="fa-solid '+ic[t]+'"></i><span>'+m+'</span>';c.appendChild(el);setTimeout(function(){el.style.animation='toastOut 0.3s ease forwards';setTimeout(function(){el.remove();},300);},3500);}
+
+    /**
+     * Switches between the login and signup authentication pages.
+     * Hides both pages first, then shows the requested one.
+     * If switching to signup, resets to step 1.
+     * @param {string} p - The page to show: 'login' or 'signup'.
+     */
+    function switchAuth(p){document.getElementById('loginPage').classList.remove('active');document.getElementById('signupPage').classList.remove('active');document.getElementById(p+'Page').classList.add('active');if(p==='signup')goToSignupStep(1);}
+
+    /**
+     * Toggles the visibility of a password input field between
+     * plain text and password (masked) mode. Also updates the
+     * eye icon to reflect the current state.
+     * @param {string} iid - The ID of the password input element.
+     * @param {string} eid - The ID of the eye icon element.
+     */
+    function togglePass(iid,eid){var inp=document.getElementById(iid),ic=document.getElementById(eid);if(inp.type==='password'){inp.type='text';ic.className='fa-solid fa-eye-slash';}else{inp.type='password';ic.className='fa-solid fa-eye';}}
+
+    /**
+     * Handles the login form submission. Validates that both username
+     * and password are provided, then checks against the admin account
+     * and registered student accounts. On success, stores auth data
+     * in localStorage and redirects to the dashboard.
+     */
+    function handleLogin(){
+        var u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value.trim();
+        if(!u||!p){showToast('Please enter your username and password','error');return;}
+        initDataStore();
+        var admin=JSON.parse(localStorage.getItem('atd_admin'));
+        if(u===admin.username&&p===admin.password){
+            localStorage.setItem('atd_auth',JSON.stringify({name:admin.name,email:admin.email,role:'admin'}));
+            window.location.href='dashboard.html';return;
+        }
+        var reg=JSON.parse(localStorage.getItem('atd_registered')||'[]');
+        for(var i=0;i<reg.length;i++){
+            if(reg[i].studentId===u&&reg[i].password===p){
+                localStorage.setItem('atd_auth',JSON.stringify({name:toTitleCase(reg[i].name),email:reg[i].email,role:'student'}));
+                window.location.href='dashboard.html';return;
+            }
+        }
+        showToast('Invalid username or password','error');
+    }
+
+    /**
+     * Navigates between the 3 steps of the signup form.
+     * Validates the current step before allowing progression.
+     * Updates the step indicator dots and shows/hides the appropriate step content.
+     * @param {number} step - The target step number (1, 2, or 3).
+     */
+    function goToSignupStep(step){
+        if(step===2&&!validateSignupStep1())return;
+        if(step===3&&!validateSignupStep2())return;
+        var steps=document.querySelectorAll('.signup-step');
+        for(var i=0;i<steps.length;i++)steps[i].style.display='none';
+        document.getElementById('signupStep'+step).style.display='block';
+        document.getElementById('step1Dot').className='step-dot'+(step>1?' done':step===1?' active':'');
+        document.getElementById('step2Dot').className='step-dot'+(step>2?' done':step===2?' active':'');
+        document.getElementById('step3Dot').className='step-dot'+(step===3?' active':'');
+        if(step===3)populateReview();
+    }
+
+    /**
+     * Validates the first step of the signup form (name and student ID).
+     * Checks that the name is at least 3 characters, the student ID matches
+     * the format 2025 + 6 digits, and the ID is not already registered.
+     * Displays inline error messages and highlights invalid fields.
+     * @returns {boolean} True if step 1 is valid, false otherwise.
+     */
+    function validateSignupStep1(){
+        var n=document.getElementById('signupName').value.trim(),id=document.getElementById('signupId').value.trim(),v=true;
+        if(!n||n.length<3){document.getElementById('signupName').classList.add('error');document.getElementById('nameError').classList.add('show');v=false;}
+        else{document.getElementById('signupName').classList.remove('error');document.getElementById('nameError').classList.remove('show');}
+        if(!/^2025\d{6}$/.test(id)){document.getElementById('signupId').classList.add('error');document.getElementById('idError').classList.add('show');v=false;}
+        else{document.getElementById('signupId').classList.remove('error');document.getElementById('idError').classList.remove('show');}
+        initDataStore();var stu=JSON.parse(localStorage.getItem('atd_students'));var ex=false;
+        for(var i=0;i<stu.length;i++){if(stu[i].studentId===id){ex=true;break;}}
+        if(v&&ex){document.getElementById('signupId').classList.add('error');document.getElementById('idError').textContent='This Student ID is already registered';document.getElementById('idError').classList.add('show');v=false;}
+        else{document.getElementById('idError').textContent='Student ID must start with 2025 and be 10 digits';}
+        if(!v)showToast('Please correct the errors above','error');return v;
+    }
+
+    /**
+     * Validates the second step of the signup form (email, password, and confirm password).
+     * Checks email format, minimum password length of 6, and that both passwords match.
+     * Displays inline error messages and highlights invalid fields.
+     * @returns {boolean} True if step 2 is valid, false otherwise.
+     */
+    function validateSignupStep2(){
+        var e=document.getElementById('signupEmail').value.trim(),p=document.getElementById('signupPass').value,c=document.getElementById('signupConfirm').value,v=true;
+        if(!e||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){document.getElementById('signupEmail').classList.add('error');document.getElementById('emailError').classList.add('show');v=false;}
+        else{document.getElementById('signupEmail').classList.remove('error');document.getElementById('emailError').classList.remove('show');}
+        if(!p||p.length<6){document.getElementById('signupPass').classList.add('error');document.getElementById('passError').classList.add('show');v=false;}
+        else{document.getElementById('signupPass').classList.remove('error');document.getElementById('passError').classList.remove('show');}
+        if(p!==c){document.getElementById('signupConfirm').classList.add('error');document.getElementById('confirmError').classList.add('show');v=false;}
+        else{document.getElementById('signupConfirm').classList.remove('error');document.getElementById('confirmError').classList.remove('show');}
+        if(!v)showToast('Please correct the errors above','error');return v;
+    }
+
+    /**
+     * Updates the password strength indicator bar and label based on
+     * the current password input. Evaluates 5 criteria: length >= 6,
+     * length >= 8, contains uppercase letter, contains digit, and
+     * contains special character. Displays a corresponding strength
+     * level with color-coded feedback.
+     * @param {string} pw - The current password value to evaluate.
+     */
+    function updatePasswordStrength(pw){
+        var f=document.getElementById('strengthFill'),t=document.getElementById('strengthText'),s=0;
+        if(pw.length>=6)s++;if(pw.length>=8)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^A-Za-z0-9]/.test(pw))s++;
+        var w=['0%','20%','40%','60%','80%','100%'],c=['transparent','#f87171','#f87171','#fbbf24','#34d399','#34d399'],l=['Minimum 6 characters','Very weak','Weak','Fair','Strong','Very strong'];
+        f.style.width=w[s];f.style.background=c[s];t.textContent=l[s];t.style.color=c[s]==='transparent'?'var(--fg-muted)':c[s];
+    }
+
+    /**
+     * Populates the review and confirm section (step 3) of the signup form
+     * with a summary of the entered student information, including an avatar,
+     * name, student ID, course, email, and phone number.
+     */
+    function populateReview(){
+        var n=document.getElementById('signupName').value.trim(),id=document.getElementById('signupId').value.trim(),e=document.getElementById('signupEmail').value.trim(),ph=document.getElementById('signupPhone').value.trim(),col=getAvatarColor(n);
+        document.getElementById('reviewDetails').innerHTML='<div class="p-3 rounded-lg" style="background:var(--bg-hover);"><div class="flex items-center gap-3"><div class="avatar" style="background:'+col+'22;color:'+col+';">'+getInitials(n)+'</div><div><p class="text-sm font-semibold">'+toTitleCase(n)+'</p><p class="text-xs" style="color:var(--fg-muted);">IMS566 Student</p></div></div></div><div class="grid grid-cols-2 gap-3"><div class="p-3 rounded-lg" style="background:var(--bg-hover);"><p class="text-xs" style="color:var(--fg-muted);">Student ID</p><p class="text-sm font-semibold font-mono" style="color:var(--accent);">'+id+'</p></div><div class="p-3 rounded-lg" style="background:var(--bg-hover);"><p class="text-xs" style="color:var(--fg-muted);">Course</p><p class="text-sm font-semibold" style="color:var(--uitm-gold);">IMS566</p></div><div class="p-3 rounded-lg" style="background:var(--bg-hover);"><p class="text-xs" style="color:var(--fg-muted);">Email</p><p class="text-sm">'+e+'</p></div><div class="p-3 rounded-lg" style="background:var(--bg-hover);"><p class="text-xs" style="color:var(--fg-muted);">Phone</p><p class="text-sm">'+(ph||'Not provided')+'</p></div></div>';
+    }
+
+    /**
+     * Handles the final signup submission. Validates that the terms
+     * checkbox is checked, then adds the new student to the students
+     * list and registered users list in localStorage. Resets all
+     * signup form fields and redirects to the login page after a
+     * short delay with a success notification.
+     */
+    function handleSignup(){
+        if(!document.getElementById('agreeTerms').checked){document.getElementById('termsError').classList.add('show');showToast('Please agree to the terms','error');return;}
+        document.getElementById('termsError').classList.remove('show');
+        initDataStore();
+        var n=document.getElementById('signupName').value.trim().toUpperCase(),id=document.getElementById('signupId').value.trim(),e=document.getElementById('signupEmail').value.trim(),ph=document.getElementById('signupPhone').value.trim(),pw=document.getElementById('signupPass').value;
+        var stu=JSON.parse(localStorage.getItem('atd_students')),nid=parseInt(localStorage.getItem('atd_nextId'));
+        stu.push({id:nid++,name:n,studentId:id,class:'IMS566',email:e,phone:ph});
+        var reg=JSON.parse(localStorage.getItem('atd_registered'));reg.push({studentId:id,password:pw,name:n,email:e});
+        localStorage.setItem('atd_students',JSON.stringify(stu));localStorage.setItem('atd_nextId',nid.toString());localStorage.setItem('atd_registered',JSON.stringify(reg));
+        showToast('Pendaftaran berjaya! Account created successfully.','success');
+        document.getElementById('signupName').value='';document.getElementById('signupId').value='';document.getElementById('signupEmail').value='';document.getElementById('signupPhone').value='';document.getElementById('signupPass').value='';document.getElementById('signupConfirm').value='';document.getElementById('agreeTerms').checked=false;
+        setTimeout(function(){switchAuth('login');showToast('You can now sign in with your Student ID','info');},1000);
+    }
+
+    /* Allow pressing Enter key in the login password field to trigger login */
+    document.getElementById('loginPass').addEventListener('keydown',function(e){if(e.key==='Enter')handleLogin();});
+    /* Allow pressing Enter key in the login username field to trigger login */
+    document.getElementById('loginUser').addEventListener('keydown',function(e){if(e.key==='Enter')handleLogin();});
+
+    </script>
+</body>
+</html>

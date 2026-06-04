@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - UiTM Attendance System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script>tailwind.config={theme:{extend:{fontFamily:{display:['Space Grotesk','sans-serif'],body:['DM Sans','sans-serif']}}}}</script>
+    <style>
+        :root{--bg:#0c0a0f;--bg-secondary:#13111a;--bg-card:#1a1723;--bg-hover:#231f30;--fg:#ece8f0;--fg-muted:#847a8e;--accent:#c2185b;--accent-hover:#e91a63;--accent-dim:rgba(194,24,91,0.12);--accent-glow:rgba(194,24,91,0.25);--uitm-maroon:#7a1b3e;--uitm-gold:#d4a843;--success:#34d399;--danger:#f87171;--warning:#fbbf24;--info:#818cf8;--border:#2a2535;}
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--fg);overflow-x:hidden;}
+        ::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:var(--bg-secondary);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}::-webkit-scrollbar-thumb:hover{background:var(--fg-muted);}
+        .bg-grid{background-image:radial-gradient(circle at 20% 50%,rgba(194,24,91,0.03) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(194,24,91,0.02) 0%,transparent 40%),linear-gradient(rgba(42,37,53,0.3) 1px,transparent 1px),linear-gradient(90deg,rgba(42,37,53,0.3) 1px,transparent 1px);background-size:100% 100%,100% 100%,60px 60px,60px 60px;}
+        .sidebar{background:var(--bg-secondary);border-right:1px solid var(--border);transition:width 0.3s ease,left 0.3s ease;}
+        .nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;border-radius:10px;cursor:pointer;transition:all 0.2s ease;color:var(--fg-muted);font-weight:500;position:relative;overflow:hidden;text-decoration:none;}
+        .nav-item::before{content:'';position:absolute;left:0;top:0;width:3px;height:100%;background:var(--accent);border-radius:0 3px 3px 0;transform:scaleY(0);transition:transform 0.2s ease;}
+        .nav-item:hover{background:var(--bg-hover);color:var(--fg);}
+        .nav-item.active{background:var(--accent-dim);color:var(--accent);}
+        .nav-item.active::before{transform:scaleY(1);}
+        .card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;transition:all 0.3s ease;}
+        .card:hover{border-color:rgba(194,24,91,0.2);box-shadow:0 4px 24px rgba(0,0,0,0.3);}
+        .stat-card{position:relative;overflow:hidden;}
+        .stat-card .stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+        .stat-card .stat-glow{position:absolute;width:120px;height:120px;border-radius:50%;filter:blur(50px);top:-30px;right:-30px;pointer-events:none;}
+        .input-field{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--fg);font-size:14px;width:100%;transition:all 0.2s ease;outline:none;font-family:'DM Sans',sans-serif;}
+        .input-field:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+        select.input-field{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23847a8e' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
+        .uitm-crest{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--uitm-maroon));}
+        .admin-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(212,168,67,0.15);color:var(--uitm-gold);border:1px solid rgba(212,168,67,0.25);text-transform:uppercase;letter-spacing:0.05em;}
+        .chart-card{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;transition:all 0.3s ease;}
+        .chart-card:hover{border-color:rgba(194,24,91,0.2);box-shadow:0 4px 24px rgba(0,0,0,0.3);}
+        .chart-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;margin-bottom:4px;}
+        .chart-subtitle{font-size:12px;color:var(--fg-muted);margin-bottom:16px;}
+        .pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--success);position:relative;}
+        .pulse-dot::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--success);animation:pulse 2s ease-in-out infinite;}
+        @keyframes pulse{0%,100%{opacity:0;transform:scale(0.8);}50%{opacity:0.5;transform:scale(1.2);}}
+        .toast-container{position:fixed;top:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;}
+        .toast{padding:14px 20px;border-radius:12px;font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;animation:toastIn 0.4s cubic-bezier(0.16,1,0.3,1);box-shadow:0 8px 32px rgba(0,0,0,0.3);min-width:280px;}
+        .toast-success{background:#065f46;color:#6ee7b7;border:1px solid rgba(52,211,153,0.3);}
+        .toast-error{background:#7f1d1d;color:#fca5a5;border:1px solid rgba(248,113,113,0.3);}
+        .toast-info{background:#1e1e3f;color:#c4b5fd;border:1px solid rgba(129,140,248,0.3);}
+        @keyframes toastIn{from{opacity:0;transform:translateX(40px) scale(0.95);}to{opacity:1;transform:translateX(0) scale(1);}}
+        @keyframes toastOut{from{opacity:1;}to{opacity:0;transform:translateX(40px);}}
+        @media(max-width:768px){.sidebar{position:fixed;left:-260px;z-index:100;transition:left 0.3s ease;height:100vh;}.sidebar.open{left:0;}.mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;display:none;}.mobile-overlay.show{display:block;}}
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="min-h-screen flex">
+        <div class="mobile-overlay" id="mobileOverlay" onclick="closeSidebar()"></div>
+        <aside class="sidebar w-64 flex-shrink-0 flex flex-col h-screen sticky top-0" id="sidebar">
+            <div class="p-5 flex items-center gap-3"><div class="uitm-crest"><i class="fa-solid fa-building-columns text-white text-sm"></i></div><div><h2 class="font-display font-bold text-sm" style="color:var(--fg);">UiTM Attendance</h2><p class="text-xs" style="color:var(--fg-muted);">IMS566</p></div></div>
+            <nav class="flex-1 px-4 space-y-1">
+                <div class="text-xs font-semibold uppercase tracking-wider px-3 mb-3" style="color:var(--fg-muted);">Main Menu</div>
+                <a href="dashboard.html" class="nav-item active"><i class="fa-solid fa-chart-pie w-5 text-center"></i><span>Dashboard</span></a>
+                <a href="attendance.html" class="nav-item"><i class="fa-solid fa-calendar-check w-5 text-center"></i><span>Attendance</span></a>
+                <a href="students.html" class="nav-item"><i class="fa-solid fa-users w-5 text-center"></i><span>Student List</span></a>
+                <a href="announcements.html" class="nav-item"><i class="fa-solid fa-bullhorn w-5 text-center"></i><span>Announcements</span></a>
+                <div class="text-xs font-semibold uppercase tracking-wider px-3 mb-3 mt-6" style="color:var(--fg-muted);">System</div>
+                <a href="settings.html" class="nav-item"><i class="fa-solid fa-gear w-5 text-center"></i><span>Preferences</span></a>
+            </nav>
+            <div class="p-4 m-4 rounded-xl" style="background:var(--accent-dim);border:1px solid rgba(194,24,91,0.15);"><p class="text-xs font-medium mb-1" style="color:var(--accent);">IMS566</p><p class="text-xs" style="color:var(--fg-muted);">Adv. Web Design Development &amp; Content Management</p></div>
+            <div class="p-4 border-t" style="border-color:var(--border);"><div class="flex items-center gap-3"><div class="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-sm" style="background:linear-gradient(135deg,var(--accent),var(--uitm-maroon));color:white;"><i class="fa-solid fa-user-shield text-xs"></i></div><div class="flex-1 min-w-0"><div class="flex items-center gap-2"><p class="text-sm font-medium truncate" style="color:var(--fg);" id="sidebarUser">Admin</p><span class="admin-badge" id="sidebarBadge">Admin</span></div><p class="text-xs truncate" style="color:var(--fg-muted);" id="sidebarEmail">admin@uitm.edu.my</p></div><button onclick="handleLogout()" style="color:var(--fg-muted);background:none;border:none;cursor:pointer;" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button></div></div>
+        </aside>
+        <main class="flex-1 min-h-screen bg-grid flex flex-col">
+            <header class="sticky top-0 z-50 flex items-center justify-between px-6 py-4" style="background:rgba(12,10,15,0.8);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);">
+                <div class="flex items-center gap-4"><button class="md:hidden" onclick="toggleSidebar()" style="background:none;border:none;color:var(--fg);cursor:pointer;font-size:20px;"><i class="fa-solid fa-bars"></i></button><div><h1 class="font-display text-lg font-bold">Dashboard</h1><p class="text-xs" style="color:var(--fg-muted);">IMS566 attendance overview</p></div></div>
+                <div class="flex items-center gap-4"><div class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg" style="background:var(--bg-card);border:1px solid var(--border);"><i class="fa-solid fa-search text-xs" style="color:var(--fg-muted);"></i><input type="text" placeholder="Search..." class="bg-transparent border-none outline-none text-sm" style="color:var(--fg);width:140px;" id="globalSearch" oninput="handleGlobalSearch(this.value)"></div><div class="flex items-center gap-2"><div class="pulse-dot"></div><span class="text-xs font-medium hidden sm:inline" style="color:var(--success);">Online</span></div></div>
+            </header>
+            <div class="p-6 max-w-7xl mx-auto flex-1 w-full">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--accent-dim);"><i class="fa-solid fa-calendar-day" style="color:var(--accent);"></i></div><div><p class="text-sm font-semibold" id="currentDate"></p><p class="text-xs" style="color:var(--fg-muted);" id="currentDay"></p></div></div><span class="text-xs font-semibold px-3 py-1.5 rounded-lg" style="background:var(--accent-dim);color:var(--accent);border:1px solid rgba(194,24,91,0.2);"><i class="fa-solid fa-code mr-1"></i> IMS566</span></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="card stat-card"><div class="stat-glow" style="background:rgba(194,24,91,0.08);"></div><div class="flex items-center justify-between mb-3"><div class="stat-icon" style="background:var(--accent-dim);"><i class="fa-solid fa-users" style="color:var(--accent);"></i></div></div><p class="text-2xl font-display font-bold" id="totalStudents">0</p><p class="text-xs" style="color:var(--fg-muted);">Total Students</p></div>
+                    <div class="card stat-card"><div class="stat-glow" style="background:rgba(52,211,153,0.08);"></div><div class="flex items-center justify-between mb-3"><div class="stat-icon" style="background:rgba(52,211,153,0.12);"><i class="fa-solid fa-check-circle" style="color:var(--success);"></i></div></div><p class="text-2xl font-display font-bold" id="presentCount">0</p><p class="text-xs" style="color:var(--fg-muted);">Present Today</p></div>
+                    <div class="card stat-card"><div class="stat-glow" style="background:rgba(248,113,113,0.08);"></div><div class="flex items-center justify-between mb-3"><div class="stat-icon" style="background:rgba(248,113,113,0.12);"><i class="fa-solid fa-times-circle" style="color:var(--danger);"></i></div></div><p class="text-2xl font-display font-bold" id="absentCount">0</p><p class="text-xs" style="color:var(--fg-muted);">Absent Today</p></div>
+                    <div class="card stat-card"><div class="stat-glow" style="background:rgba(212,168,67,0.08);"></div><div class="flex items-center justify-between mb-3"><div class="stat-icon" style="background:rgba(212,168,67,0.12);"><i class="fa-solid fa-percentage" style="color:var(--uitm-gold);"></i></div></div><p class="text-2xl font-display font-bold" id="avgAttendance">0%</p><p class="text-xs" style="color:var(--fg-muted);">Attendance Rate</p></div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                    <div class="chart-card lg:col-span-2"><div class="flex items-center justify-between mb-4"><div><p class="chart-title">Monthly Attendance Trend</p><p class="chart-subtitle">IMS566 attendance vs absence percentage</p></div><select class="input-field" style="width:auto;padding:6px 30px 6px 10px;font-size:12px;" id="chartPeriod" onchange="updateLineChart()"><option value="6">Last 6 Months</option><option value="12">Last 12 Months</option></select></div><div style="height:280px;"><canvas id="lineChartCanvas"></canvas></div></div>
+                    <div class="chart-card"><p class="chart-title">Today's Status</p><p class="chart-subtitle">IMS566 breakdown by category</p><div style="height:200px;display:flex;align-items:center;justify-content:center;"><canvas id="doughnutChartCanvas"></canvas></div><div class="flex justify-center gap-4 mt-4"><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:var(--success);"></span><span class="text-xs" style="color:var(--fg-muted);">Present</span></div><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:var(--danger);"></span><span class="text-xs" style="color:var(--fg-muted);">Absent</span></div><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:var(--warning);"></span><span class="text-xs" style="color:var(--fg-muted);">Late</span></div></div></div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                    <div class="chart-card"><p class="chart-title">Weekly Attendance Comparison</p><p class="chart-subtitle">Present, absent and late counts per day this week</p><div style="height:280px;"><canvas id="barChartCanvas"></canvas></div></div>
+                    <div class="chart-card"><p class="chart-title">Overall Status Distribution</p><p class="chart-subtitle">Total attendance records by status</p><div style="height:280px;display:flex;align-items:center;justify-content:center;"><canvas id="pieChartCanvas"></canvas></div></div>
+                </div>
+                <div class="grid grid-cols-1 gap-4 mb-6"><div class="chart-card"><p class="chart-title">Student Attendance Ranking</p><p class="chart-subtitle">Top 10 students by attendance percentage</p><div style="height:360px;"><canvas id="hBarChartCanvas"></canvas></div></div></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4"><div class="card"><h3 class="font-display font-semibold text-base mb-4">Recent Activity</h3><div class="space-y-3" id="recentActivity"></div></div><div class="card"><h3 class="font-display font-semibold text-base mb-4">Low Attendance Alert</h3><div class="space-y-3" id="lowAttendance"></div></div></div>
+            </div>
+            <footer style="background:var(--bg-secondary);border-top:1px solid var(--border);padding:24px 32px;margin-top:auto;">
+                <div class="max-w-7xl mx-auto"><div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"><div><div class="flex items-center gap-3 mb-3"><div class="uitm-crest" style="width:32px;height:32px;"><i class="fa-solid fa-building-columns text-white text-xs"></i></div><div><p class="font-display font-bold text-sm">UiTM Attendance System</p><p class="text-xs" style="color:var(--fg-muted);">IMS566</p></div></div><p class="text-xs" style="color:var(--fg-muted);">Advanced Web Design Development &amp; Content Management - Semester MAC 2026</p></div><div><p class="text-sm font-semibold mb-2">Quick Links</p><ul class="space-y-1"><li><a href="dashboard.html" class="text-xs hover:underline" style="color:var(--fg-muted);">Dashboard</a></li><li><a href="attendance.html" class="text-xs hover:underline" style="color:var(--fg-muted);">Attendance Records</a></li><li><a href="announcements.html" class="text-xs hover:underline" style="color:var(--fg-muted);">Announcements</a></li></ul></div><div><p class="text-sm font-semibold mb-2">Contact & Info</p><p class="text-xs" style="color:var(--fg-muted);"><i class="fa-solid fa-user-graduate mr-1"></i> Developed by: MUHAMAD FARIS AIMAN BIN MOHAMAD ROSLI (2025480948)</p><p class="text-xs" style="color:var(--fg-muted);"><i class="fa-solid fa-chalkboard-user mr-1"></i> Lecturer: TS. DR. MOHAMAD RAHIMI BIN MOHAMAD ROSMAN</p><p class="text-xs" style="color:var(--fg-muted);"><i class="fa-solid fa-envelope mr-1"></i> admin@uitm.edu.my</p></div></div><div class="pt-4" style="border-top:1px solid var(--border);"><p class="text-xs text-center" style="color:var(--fg-muted);">&copy; 2026 Universiti Teknologi MARA. All rights reserved. | IMS566 Faris Aiman INDIVIDUAL PROJECT</p></div></div>
+            </footer>
+        </main>
+    </div>
+    <script>
+    /* Color palette used for generating avatar background colors */
+    var avatarColors=['#c2185b','#34d399','#f87171','#818cf8','#f472b6','#fb923c','#2dd4bf','#d4a843','#60a5fa','#a78bfa'];
+
+    /**
+     * Generates a consistent avatar color based on a name string.
+     * Uses a simple hash function to map the name to one of the predefined colors.
+     * @param {string} n - The name string used to derive the color.
+     * @returns {string} A hex color code from the avatarColors array.
+     */
+    function getAvatarColor(n){var h=0;for(var i=0;i<n.length;i++){h=n.charCodeAt(i)+((h<<5)-h);}return avatarColors[Math.abs(h)%avatarColors.length];}
+
+    /**
+     * Extracts initials from a full name for use in avatar displays.
+     * If the name has 3 or more parts, returns the first and last initials.
+     * Otherwise, returns up to 2 initials from the first parts.
+     * @param {string} n - The full name string.
+     * @returns {string} A 1-2 character string of uppercase initials.
+     */
+    function getInitials(n){var p=n.split(' ');if(p.length>=3)return(p[0][0]+p[p.length-1][0]).toUpperCase();return p.map(function(x){return x[0];}).join('').toUpperCase().slice(0,2);}
+
+    /**
+     * Converts an uppercase name string to title case, preserving
+     * the special keywords "BIN" and "BINTI" with only the first letter capitalized.
+     * @param {string} s - The uppercase name string.
+     * @returns {string} The title-cased name string.
+     */
+    function toTitleCase(s){var w=s.split(' '),r=[];for(var i=0;i<w.length;i++){if(w[i]==='BIN'||w[i]==='BINTI')r.push(w[i][0]+w[i].slice(1).toLowerCase());else r.push(w[i][0].toUpperCase()+w[i].slice(1).toLowerCase());}return r.join(' ');}
+
+    /**
+     * Displays a temporary toast notification in the top-right corner.
+     * Automatically removes itself after 3.5 seconds with a fade-out animation.
+     * @param {string} m - The message text to display in the toast.
+     * @param {string} [t='success'] - The toast type: 'success', 'error', or 'info'.
+     */
+    function showToast(m,t){t=t||'success';var c=document.getElementById('toastContainer'),el=document.createElement('div');var ic={success:'fa-check-circle',error:'fa-times-circle',info:'fa-info-circle'};el.className='toast toast-'+t;el.innerHTML='<i class="fa-solid '+ic[t]+'"></i><span>'+m+'</span>';c.appendChild(el);setTimeout(function(){el.style.animation='toastOut 0.3s ease forwards';setTimeout(function(){el.remove();},300);},3500);}
+
+    /**
+     * Toggles the mobile sidebar open/closed state and the overlay backdrop.
+     * Used for responsive navigation on small screens.
+     */
+    function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('mobileOverlay').classList.toggle('show');}
+
+    /**
+     * Closes the mobile sidebar and removes the overlay backdrop.
+     */
+    function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('mobileOverlay').classList.remove('show');}
+
+    /**
+     * Logs the user out by removing the authentication data from localStorage
+     * and redirecting to the login page.
+     */
+    function handleLogout(){localStorage.removeItem('atd_auth');window.location.href='index.html';}
+
+    /**
+     * Handles the global search input in the header. Redirects to the
+     * student list page with the search query as a URL parameter.
+     * @param {string} q - The search query string entered by the user.
+     */
+    function handleGlobalSearch(q){if(!q.trim())return;window.location.href='students.html?search='+encodeURIComponent(q);}
+
+    /* Auth check: if no auth data in localStorage, redirect to login page;
+       otherwise populate sidebar with the logged-in user's info */
+    var auth=localStorage.getItem('atd_auth');
+    if(!auth){window.location.href='index.html';}
+    else{var a=JSON.parse(auth);document.getElementById('sidebarUser').textContent=a.name;document.getElementById('sidebarEmail').textContent=a.email;document.getElementById('sidebarBadge').textContent=a.role==='admin'?'Admin':'Student';}
+
+    /* Load students and attendance records from localStorage into memory */
+    var students=JSON.parse(localStorage.getItem('atd_students')||'[]');
+    var attendanceRecords=JSON.parse(localStorage.getItem('atd_records')||'{}');
+
+    /**
+     * Calculates the attendance percentage for a specific student across
+     * all recorded dates. Counts "present" and "late" as attended.
+     * @param {number} sid - The student's unique ID.
+     * @returns {number} The attendance percentage rounded to the nearest integer (0-100).
+     */
+    function getStudentAttendancePercentage(sid){var total=0,present=0,dates=Object.keys(attendanceRecords);for(var i=0;i<dates.length;i++){var rec=attendanceRecords[dates[i]][sid];if(rec){total++;if(rec==='present'||rec==='late')present++;}}if(total===0)return 0;return Math.round((present/total)*100);}
+
+    /**
+     * Retrieves today's attendance statistics including counts of present,
+     * absent, late, and unmarked students.
+     * @returns {Object} An object with present, absent, late, total, and unmarked counts.
+     */
+    function getTodayStats(){var tk=getTodayKey(),tr=attendanceRecords[tk]||{},p=0,a=0,l=0;for(var i=0;i<students.length;i++){var s=tr[students[i].id];if(s==='present')p++;else if(s==='absent')a++;else if(s==='late')l++;}return{present:p,absent:a,late:l,total:students.length,unmarked:students.length-p-a-l};}
+
+    /**
+     * Formats a Date object into a 'YYYY-MM-DD' string key.
+     * @param {Date} d - The date to format.
+     * @returns {string} The formatted date key string.
+     */
+    function formatDateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+    /**
+     * Returns today's date as a 'YYYY-MM-DD' formatted string key.
+     * @returns {string} Today's date key string.
+     */
+    function getTodayKey(){return formatDateKey(new Date());}
+
+    /* Chart.js instance references, initialized to null and created when updating charts */
+    var lineChartInstance=null,doughnutChartInstance=null,barChartInstance=null,pieChartInstance=null,hBarChartInstance=null;
+
+    /* Shared font and tooltip configuration objects used across all Chart.js charts */
+    var chartFont={family:'DM Sans'},chartTitleFont={family:'Space Grotesk',weight:'600'},tooltipStyle={backgroundColor:'#1a1723',titleColor:'#ece8f0',bodyColor:'#847a8e',borderColor:'#2a2535',borderWidth:1,padding:10,titleFont:chartTitleFont,bodyFont:chartFont};
+
+    /**
+     * Main dashboard update function. Refreshes the current date display,
+     * stat cards (total students, present, absent, attendance rate),
+     * all five charts, recent activity list, and low attendance alerts.
+     */
+    function updateDashboard(){
+        var now=new Date();
+        document.getElementById('currentDate').textContent=now.toLocaleDateString('en-MY',{year:'numeric',month:'long',day:'numeric'});
+        document.getElementById('currentDay').textContent=now.toLocaleDateString('en-MY',{weekday:'long'});
+        var stats=getTodayStats();
+        document.getElementById('totalStudents').textContent=students.length;
+        document.getElementById('presentCount').textContent=stats.present;
+        document.getElementById('absentCount').textContent=stats.absent;
+        var tp=0;for(var i=0;i<students.length;i++){tp+=getStudentAttendancePercentage(students[i].id);}
+        document.getElementById('avgAttendance').textContent=(students.length>0?Math.round(tp/students.length):0)+'%';
+        updateLineChart();updateDoughnutChart(stats);updateBarChart();updatePieChart();updateHBarChart();
+        renderRecentActivity();renderLowAttendance();
+    }
+
+    /**
+     * Renders or updates the monthly attendance trend line chart.
+     * Calculates the attendance and absence percentages for each month
+     * within the selected period (6 or 12 months). Destroys the previous
+     * chart instance before creating a new one.
+     */
+    function updateLineChart(){
+        var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        var period=parseInt(document.getElementById('chartPeriod').value),now=new Date(),labels=[],presentData=[],absentData=[];
+        for(var i=period-1;i>=0;i--){var d=new Date(now.getFullYear(),now.getMonth()-i,1);labels.push(months[d.getMonth()]+' '+d.getFullYear());var pC=0,aC=0,dk=Object.keys(attendanceRecords);for(var j=0;j<dk.length;j++){var dobj=new Date(dk[j]);if(dobj.getMonth()===d.getMonth()&&dobj.getFullYear()===d.getFullYear()){var recs=Object.values(attendanceRecords[dk[j]]);for(var k=0;k<recs.length;k++){if(recs[k]==='present'||recs[k]==='late')pC++;else if(recs[k]==='absent')aC++;}}}var total=pC+aC;presentData.push(total>0?Math.round((pC/total)*100):0);absentData.push(total>0?Math.round((aC/total)*100):0);}
+        if(lineChartInstance)lineChartInstance.destroy();var ctx=document.getElementById('lineChartCanvas').getContext('2d');var grad=ctx.createLinearGradient(0,0,0,280);grad.addColorStop(0,'rgba(194,24,91,0.25)');grad.addColorStop(1,'rgba(194,24,91,0.01)');
+        lineChartInstance=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:'Attendance %',data:presentData,borderColor:'#c2185b',backgroundColor:grad,fill:true,tension:0.4,pointBackgroundColor:'#c2185b',pointBorderColor:'#0c0a0f',pointBorderWidth:2,pointRadius:5,pointHoverRadius:7},{label:'Absence %',data:absentData,borderColor:'#f87171',backgroundColor:'rgba(248,113,113,0.05)',fill:true,tension:0.4,pointBackgroundColor:'#f87171',pointBorderColor:'#0c0a0f',pointBorderWidth:2,pointRadius:4,pointHoverRadius:6,borderDash:[5,5]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#847a8e',font:{family:'DM Sans',size:12},usePointStyle:true,pointStyle:'circle'}},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.dataset.label+': '+c.parsed.y+'%';}}})},scales:{y:{beginAtZero:true,max:100,grid:{color:'rgba(42,37,53,0.5)',drawBorder:false},ticks:{color:'#847a8e',font:{family:'DM Sans',size:11},callback:function(v){return v+'%';}}},x:{grid:{display:false},ticks:{color:'#847a8e',font:{family:'DM Sans',size:11}}}},interaction:{intersect:false,mode:'index'}}});
+    }
+
+    /**
+     * Renders or updates the doughnut chart showing today's attendance
+     * breakdown by category (present, absent, late, unmarked).
+     * Destroys the previous chart instance before creating a new one.
+     * @param {Object} stats - Today's statistics object with present, absent, late, unmarked counts.
+     */
+    function updateDoughnutChart(stats){if(doughnutChartInstance)doughnutChartInstance.destroy();var ctx=document.getElementById('doughnutChartCanvas').getContext('2d');doughnutChartInstance=new Chart(ctx,{type:'doughnut',data:{labels:['Present','Absent','Late','Unmarked'],datasets:[{data:[stats.present,stats.absent,stats.late,Math.max(0,stats.unmarked)],backgroundColor:['#34d399','#f87171','#fbbf24','#2a2535'],borderColor:'#1a1723',borderWidth:3,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:tooltipStyle}}});}
+
+    /**
+     * Renders or updates the grouped bar chart comparing weekly attendance
+     * counts (present, absent, late) for each day of the current week.
+     * Destroys the previous chart instance before creating a new one.
+     */
+    function updateBarChart(){var dn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],today=new Date(),labels=[],pd=[],ad=[],ld=[];for(var i=0;i<7;i++){var d=new Date(today);d.setDate(d.getDate()-d.getDay()+i);var key=formatDateKey(d);labels.push(dn[d.getDay()]+' '+d.getDate());var pC=0,aC=0,lC=0;if(attendanceRecords[key]){var recs=attendanceRecords[key];for(var sid in recs){if(recs[sid]==='present')pC++;else if(recs[sid]==='absent')aC++;else if(recs[sid]==='late')lC++;}}pd.push(pC);ad.push(aC);ld.push(lC);}if(barChartInstance)barChartInstance.destroy();var ctx=document.getElementById('barChartCanvas').getContext('2d');barChartInstance=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Present',data:pd,backgroundColor:'#34d399',borderRadius:4,barPercentage:0.7},{label:'Absent',data:ad,backgroundColor:'#f87171',borderRadius:4,barPercentage:0.7},{label:'Late',data:ld,backgroundColor:'#fbbf24',borderRadius:4,barPercentage:0.7}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#847a8e',font:{family:'DM Sans',size:12},usePointStyle:true,pointStyle:'rect'}},tooltip:tooltipStyle},scales:{y:{beginAtZero:true,grid:{color:'rgba(42,37,53,0.5)',drawBorder:false},ticks:{color:'#847a8e',font:{family:'DM Sans',size:11},stepSize:5}},x:{grid:{display:false},ticks:{color:'#847a8e',font:{family:'DM Sans',size:11}}}}}});}
+
+    /**
+     * Renders or updates the pie chart showing the overall distribution
+     * of all attendance records across all dates by status (present, absent, late).
+     * Includes percentage labels in tooltips. Destroys the previous chart
+     * instance before creating a new one.
+     */
+    function updatePieChart(){var tp=0,ta=0,tl=0,dk=Object.keys(attendanceRecords);for(var i=0;i<dk.length;i++){var recs=attendanceRecords[dk[i]];for(var sid in recs){if(recs[sid]==='present')tp++;else if(recs[sid]==='absent')ta++;else if(recs[sid]==='late')tl++;}}if(pieChartInstance)pieChartInstance.destroy();var ctx=document.getElementById('pieChartCanvas').getContext('2d');pieChartInstance=new Chart(ctx,{type:'pie',data:{labels:['Present','Absent','Late'],datasets:[{data:[tp,ta,tl],backgroundColor:['#34d399','#f87171','#fbbf24'],borderColor:'#1a1723',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#847a8e',font:{family:'DM Sans',size:12},padding:16,usePointStyle:true,pointStyle:'circle'}},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){var t=0;for(var i=0;i<c.dataset.data.length;i++)t+=c.dataset.data[i];var pct=t>0?Math.round((c.parsed/t)*100):0;return c.label+': '+c.parsed+' ('+pct+'%)';}}})}}});}
+
+    /**
+     * Renders or updates the horizontal bar chart showing the top 10
+     * students ranked by attendance percentage. Bars are color-coded:
+     * green (>=80%), yellow (>=60%), or red (<60%).
+     * Destroys the previous chart instance before creating a new one.
+     */
+    function updateHBarChart(){var sp=[];for(var i=0;i<students.length;i++){sp.push({name:toTitleCase(students[i].name),pct:getStudentAttendancePercentage(students[i].id)});}sp.sort(function(a,b){return b.pct-a.pct;});var top10=sp.slice(0,10),labels=[],data=[],colors=[];for(var i=0;i<top10.length;i++){var np=top10[i].name.split(' ');labels.push(np[0]+(np.length>1?' '+np[np.length-1]:''));data.push(top10[i].pct);if(top10[i].pct>=80)colors.push('#34d399');else if(top10[i].pct>=60)colors.push('#fbbf24');else colors.push('#f87171');}if(hBarChartInstance)hBarChartInstance.destroy();var ctx=document.getElementById('hBarChartCanvas').getContext('2d');hBarChartInstance=new Chart(ctx,{type:'bar',data:{labels:labels,datasets:[{label:'Attendance %',data:data,backgroundColor:colors,borderRadius:4,barPercentage:0.65}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:Object.assign({},tooltipStyle,{callbacks:{label:function(c){return c.parsed.x+'% attendance';}}})},scales:{x:{beginAtZero:true,max:100,grid:{color:'rgba(42,37,53,0.5)',drawBorder:false},ticks:{color:'#847a8e',font:{family:'DM Sans',size:11},callback:function(v){return v+'%';}}},y:{grid:{display:false},ticks:{color:'#847a8e',font:{family:'DM Sans',size:11}}}}}});}
+
+    /**
+     * Renders the recent activity list showing the last 5 attendance
+     * record dates with summary counts of present, absent, and late
+     * students, along with the attendance percentage for each date.
+     */
+    function renderRecentActivity(){var c=document.getElementById('recentActivity'),dates=Object.keys(attendanceRecords).sort().reverse().slice(0,5),html='';for(var i=0;i<dates.length;i++){var dk=dates[i],rec=attendanceRecords[dk],pC=0,aC=0,lC=0;for(var sid in rec){if(rec[sid]==='present')pC++;else if(rec[sid]==='absent')aC++;else if(rec[sid]==='late')lC++;}var d=new Date(dk),ds=d.toLocaleDateString('en-MY',{month:'short',day:'numeric'}),total=pC+aC+lC,pct=total>0?Math.round((pC+lC)/total*100):0,pc=pct>=75?'var(--success)':pct>=50?'var(--warning)':'var(--danger)';html+='<div class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--bg-hover);"><div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background:var(--accent-dim);"><i class="fa-solid fa-calendar-check text-sm" style="color:var(--accent);"></i></div><div class="flex-1 min-w-0"><p class="text-sm font-medium">'+ds+' Records</p><p class="text-xs" style="color:var(--fg-muted);">'+pC+' hadir, '+aC+' tidak hadir, '+lC+' lewat</p></div><div class="text-right"><p class="text-sm font-bold" style="color:'+pc+';">'+pct+'%</p></div></div>';}c.innerHTML=html||'<p style="color:var(--fg-muted);" class="text-sm text-center py-4">No recent activity</p>';}
+
+    /**
+     * Renders the low attendance alert list showing up to 5 students
+     * whose attendance percentage is below 75%, sorted from lowest
+     * to highest. Displays a progress bar for each student.
+     * Shows a "all clear" message if no students fall below the threshold.
+     */
+    function renderLowAttendance(){var c=document.getElementById('lowAttendance'),ls=[];for(var i=0;i<students.length;i++){var pct=getStudentAttendancePercentage(students[i].id);if(pct<75)ls.push({name:students[i].name,studentId:students[i].studentId,pct:pct});}ls.sort(function(a,b){return a.pct-b.pct;});ls=ls.slice(0,5);var html='';if(ls.length===0){html='<div class="text-center py-6"><i class="fa-solid fa-circle-check text-2xl mb-2" style="color:var(--success);"></i><p class="text-sm" style="color:var(--fg-muted);">All students have 75%+ attendance</p></div>';}else{for(var i=0;i<ls.length;i++){var s=ls[i],col=getAvatarColor(s.name),bc=s.pct>=75?'var(--success)':s.pct>=50?'var(--warning)':'var(--danger)';html+='<div class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--bg-hover);"><div class="avatar" style="background:'+col+'22;color:'+col+';">'+getInitials(s.name)+'</div><div class="flex-1 min-w-0"><p class="text-sm font-medium truncate">'+toTitleCase(s.name)+'</p><p class="text-xs font-mono" style="color:var(--fg-muted);">'+s.studentId+'</p></div><div class="text-right"><p class="text-sm font-bold" style="color:'+bc+';">'+s.pct+'%</p><div class="w-16 h-1.5 rounded-full mt-1" style="background:var(--bg);"><div class="h-full rounded-full" style="width:'+s.pct+'%;background:'+bc+';"></div></div></div></div>';}}c.innerHTML=html;}
+
+    /* Initialize the dashboard on page load */
+    updateDashboard();
+    </script>
+</body>
+</html>
