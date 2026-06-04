@@ -1,0 +1,2 @@
+# students-attendance-trackerr
+IMS566 INDIVIDUAL PROJECT - STUDENT ATTENDANCE TRACKER
